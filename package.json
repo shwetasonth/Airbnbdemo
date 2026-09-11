@@ -1,4 +1,7 @@
 {
+  "engines": {
+    "node":"v23.6.1"
+  },
   "name": "airbnbdemo-mern-project",
   "version": "1.0.0",
   "description": "1.Database Set Up\r 2.REST Apis for CRUD",

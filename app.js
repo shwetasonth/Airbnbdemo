@@ -102,17 +102,6 @@ app.use((err, req, res, next) => {
   res.status(statuscode).render("listings/error.ejs", { err });
 });
 
-async function startServer() {
-  try {
-    await main();
-    console.log("Connection established successfully!!!");
-    app.listen(port, () => {
-      console.log(`App stated at port ${port}`);
-    });
-  } catch (err) {
-    console.error("MongoDB connection failed:", err.message);
-    process.exitCode = 1;
-  }
-}
-
-startServer();
+app.listen(port, () => {
+  console.log(`App stated at port ${port}`);
+});
