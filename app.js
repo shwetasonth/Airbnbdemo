@@ -102,6 +102,14 @@ app.use((err, req, res, next) => {
   res.status(statuscode).render("listings/error.ejs", { err });
 });
 
+
+
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("MONGO_DB_URL exists:", !!process.env.MONGO_DB_URL);
+console.log("MONGO_DB_URL first 20 chars:", process.env.MONGO_DB_URL?.substring(0, 20));
+console.log("SECRET exists:", !!process.env.SECRET);
+
+
 app.listen(port, () => {
   console.log(`App stated at port ${port}`);
 });
