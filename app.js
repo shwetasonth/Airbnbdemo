@@ -25,12 +25,22 @@ const port = 8000;
 
 //connection to mongodb
 
+if (!process.env.MONGO_DB_URL) {
+  console.error("❌ MONGO_DB_URL is not defined");
+  process.exit(1); // Exit immediately
+}
+
 const MONGO_URL = process.env.MONGO_DB_URL;
 // const MONGO_URL = "mongodb://127.0.0.1:27017/AirbnbDB";
 async function main() {
-  mongoose.connect(MONGO_URL);
+  try {
+    await mongoose.connect(MONGO_URL);
+    console.log("✅ MongoDB connected successfully!");
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err.message);
+    process.exit(1); // Exit if DB fails
+  }
 }
-
 //mongoose connection
 main()
   .then(() => {
@@ -102,13 +112,13 @@ app.use((err, req, res, next) => {
   res.status(statuscode).render("listings/error.ejs", { err });
 });
 
-
-
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("MONGO_DB_URL exists:", !!process.env.MONGO_DB_URL);
-console.log("MONGO_DB_URL first 20 chars:", process.env.MONGO_DB_URL?.substring(0, 20));
+console.log(
+  "MONGO_DB_URL first 20 chars:",
+  process.env.MONGO_DB_URL?.substring(0, 20),
+);
 console.log("SECRET exists:", !!process.env.SECRET);
-
 
 app.listen(port, () => {
   console.log(`App stated at port ${port}`);
