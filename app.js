@@ -1,7 +1,9 @@
-if (process.env.NODE_ENV !== "production") {
+//very important only works i.e env is loaded only in development mode
+if (process.env.NODE_ENV != "production") {
   require("dotenv").config();
 }
 
+console.log(process.env.secret);
 const express = require("express");
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
@@ -21,15 +23,20 @@ const reviews = require("./Routes/review.js");
 const userRouter = require("./Routes/user.js");
 const port = 8000;
 
-const MONGO_URL = process.env.MONGO_DB_URL;
-let connectionPromise;
+//connection to mongodb
 
-function connectToDatabase() {
-  if (!connectionPromise) {
-    connectionPromise = mongoose.connect(MONGO_URL);
-  }
-  return connectionPromise;
+const MONGO_URL = process.env.MONGO_DB_URL;
+// const MONGO_URL = "mongodb://127.0.0.1:27017/AirbnbDB";
+async function main() {
+  mongoose.connect(MONGO_URL);
 }
+
+//mongoose connection
+main()
+  .then(() => {
+    console.log("Connection established successfully!!!");
+  })
+  .catch((err) => console.log(err));
 
 const store = MongoStore.create({
   mongoUrl: MONGO_URL,
@@ -39,7 +46,7 @@ const store = MongoStore.create({
   touchAfter: 24 * 3600,
 });
 
-store.on("error", (err) => {
+store.on("error", () => {
   console.log("Error in mongo session store", err);
 });
 const sessionOptions = {
@@ -97,7 +104,7 @@ app.use((err, req, res, next) => {
 
 async function startServer() {
   try {
-    await connectToDatabase();
+    await main();
     console.log("Connection established successfully!!!");
     app.listen(port, () => {
       console.log(`App stated at port ${port}`);
@@ -108,9 +115,4 @@ async function startServer() {
   }
 }
 
-if (require.main === module) {
-  startServer();
-}
-
-app.connectToDatabase = connectToDatabase;
-module.exports = app;
+startServer();
