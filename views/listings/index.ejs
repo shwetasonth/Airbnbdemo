@@ -1,0 +1,103 @@
+
+<%layout("/layouts/boilerplate")%>
+
+<div id="filters">
+  <div class="filter-list" aria-label="Listing categories">
+    <button class="filter active" type="button">
+      <span class="filter-icon" aria-hidden="true">🌐</span>
+      <span>All</span>
+    </button>
+    <button class="filter" type="button">
+      <span class="filter-icon" aria-hidden="true">🏡</span>
+      <span>Homes</span>
+    </button>
+    <button class="filter" type="button">
+      <span class="filter-icon" aria-hidden="true">🎈</span>
+      <span>Experiences</span>
+    </button>
+    <button class="filter" type="button">
+      <span class="filter-icon" aria-hidden="true">🛎️</span>
+      <span>Services</span>
+    </button>
+    <button class="filter" type="button">
+      <span class="filter-icon" aria-hidden="true">🌾</span>
+      <span>Farms</span>
+    </button>
+    <button class="filter" type="button">
+      <span class="filter-icon" aria-hidden="true">🛏️</span>
+      <span>Rooms</span>
+    </button>
+    <button class="filter" type="button">
+      <span class="filter-icon" aria-hidden="true">🏙️</span>
+      <span>Iconic cities</span>
+    </button>
+    <button class="filter" type="button">
+      <span class="filter-icon" aria-hidden="true">🏄</span>
+      <span>Surfing</span>
+    </button>
+    <button class="filter" type="button">
+      <span class="filter-icon" aria-hidden="true">🌊</span>
+      <span>Amazing pools</span>
+    </button>
+    <button class="filter" type="button">
+      <span class="filter-icon" aria-hidden="true">🏖️</span>
+      <span>Beach</span>
+    </button>
+    <button class="filter" type="button">
+      <span class="filter-icon" aria-hidden="true">🏠</span>
+      <span>Cabins</span>
+    </button>
+    <button class="filter" type="button">
+      <span class="filter-icon" aria-hidden="true">🏞️</span>
+      <span>Lakefront</span>
+    </button>
+  </div>
+  <button id="filter-next" class="filter-next" type="button" aria-label="Show more categories">›</button>
+  <label class="tax-toggle" for="tax-toggle">
+    <span>Display total before taxes</span>
+    <input id="tax-toggle" type="checkbox" />
+    <span class="tax-toggle-track" aria-hidden="true"></span>
+  </label>
+</div>
+<% if (country && alllistings.length === 0) { %>
+  <p class="search-empty">No listings found in <b><%= country %></b>.</p>
+<% } %>
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
+<%for(let listing of alllistings){%>
+  <a href="/listings/<%=listing.id%>" class="listing-link">
+<div class="card " >
+    <%# Shimmer added by Copilot: remove it after the listing image loads. %>
+  <img src="<%=listing.image.url%>" class="card-img-top shimmer" alt="listing-image" style="height: 20rem" onload="this.classList.remove('shimmer')" >
+  <div class="card-img-overlay"></div>
+  <div class="card-body">
+    <p class="card-text"><b><%=listing.title%></b><br/>₹<%=listing.price.toLocaleString("en-IN")%><span class="price-period">/night</span></p>
+  </div>
+</div>
+</a>
+<%}%>
+</div>
+
+<script>
+  const filterList = document.querySelector(".filter-list");
+  const filterNext = document.getElementById("filter-next");
+
+  filterNext.addEventListener("click", () => {
+    filterList.scrollBy({
+      left: filterList.clientWidth * 0.8,
+      behavior: "smooth",
+    });
+  });
+
+  const taxToggle = document.getElementById("tax-toggle");
+
+  taxToggle.addEventListener("change", () => {
+    document.querySelectorAll(".price-period").forEach((pricePeriod) => {
+      pricePeriod.textContent = taxToggle.checked
+        ? "/night before taxes"
+        : "/night";
+    });
+  });
+</script>
+
+
+

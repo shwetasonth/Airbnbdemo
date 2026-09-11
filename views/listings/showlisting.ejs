@@ -1,0 +1,194 @@
+<%=layout("layouts/boilerplate")%>
+
+<div class="row">
+  <div class="col-8 offset-3">
+    <h3><b> <%=listing.title%></b> :</h3>
+  </div>
+
+  <div class="card col-6 offset-3 show-card">
+    <%# Shimmer added by Copilot: remove it after the listing image loads. %>
+    <img
+      src="<%=listing.image.url%>"
+      class="card-img-top show-img shimmer"
+      alt="listing-image"
+      onload="this.classList.remove('shimmer')"
+    />
+    <div class="card-body">
+      <p class="card-text">
+        <b>Owned By <i><%=listing.owner.username%></i></b></p>
+       <p class="card-text"></p> <%=listing.description%><p />
+       <p class="card-text"></p> ₹<%=listing.price.toLocaleString("en-IN")%></p>
+       <p class="card-text"></p> <%=listing.location%><br /></p>
+        <p class="card-text"></p><%=listing.country%><br />
+      </p>
+    </div>
+  </div>
+
+<% if (currUser && listing.owner && String(listing.owner._id) === String(currUser._id)) { %>
+  <div class="btns">
+    <a href="/listings/<%=listing._id%>/edit" class="btn col-1 offset-3 add-btn"
+      >Edit
+    </a>
+
+    <form method="post" action="/listings/<%=listing._id%>?_method=delete">
+      <button class="btn btn-dark offset-4">Delete</button>
+    </form>
+  </div>
+<%}%>
+  
+  <div class="col-8 offset-3 mb-3">
+    <hr />
+    <%if(currUser){%>
+    <h4>Leave a Review</h4>
+    <form method="POST" action="/listings/<%=listing.id%>/reviews" novalidate class="needs-validation">
+<fieldset class="starability-slot">
+  <legend>Rating:</legend>
+  <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" aria-label="No rating." checked />
+  <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+  <label for="first-rate1" title="Terrible">1 star</label>
+  <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+  <label for="first-rate2" title="Not good">2 stars</label>
+  <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+  <label for="first-rate3" title="Average">3 stars</label>
+  <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+  <label for="first-rate4" title="Very good">4 stars</label>
+  <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+  <label for="first-rate5" title="Amazing">5 stars</label>
+</fieldset>
+
+      <div class="mb-3 mt-3">
+        <lable for="comment" class="form-label">Comments</lable>
+        <textarea
+          id="comment"
+          name="review[comment]"
+          cols="30"
+          rows="5"
+          class="form-control" required
+        ></textarea>
+        <div class="invalid-feedback">Please add some comments for review</div>
+      </div>
+      <button class="btn btn-outline-dark">Submit</button>
+    </form>
+    <%}%>
+  </div>
+
+  <div class="col-8 offset-3 mb-3">
+    <hr />
+    <h4 class="review-section-title">All Reviews</h4>
+    <% if(listing.reviews.length) { %>
+      <div class="review-grid">
+        <% listing.reviews.forEach((review) => { %>
+          <div class="card review-card">
+            <div class="card-body review-card-body">
+              <h5 class="review-author">@<%= review.author.username%></h5>
+               <div class="review-meta">
+                <div class="review-stars">
+                  <% for(let i = 0; i < review.rating; i++) { %>
+                    <i class="fa-solid fa-star"></i>
+                  <% } %>
+                  <% for(let i = review.rating; i < 5; i++) { %>
+                    <i class="fa-regular fa-star"></i>
+                  <% } %>
+                </div>
+               
+              </div>
+             
+                
+              <p class="review-comment"><%= review.comment %></p>
+             
+              <form method="POST" action="/listings/<%=listing._id%>/reviews/<%=review._id%>?_method=delete">
+                <button class="btn review-delete-btn">Delete</button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <p>No reviews yet. Be the first to review!</p>
+    <% } %>
+  </div>
+
+
+
+
+  //goemap
+  <div class="col-8 offset-3 mb-3">
+  <hr />
+
+  <h4>Where you'll be</h4>
+
+  <div
+    id="listing-map"
+    data-location="<%= listing.location %>"
+    data-country="<%= listing.country %>"
+  ></div>
+</div>
+
+<script>
+  window.addEventListener("load", async function () {
+    const mapElement = document.getElementById("listing-map");
+
+    const location = mapElement.dataset.location?.trim();
+    const country = mapElement.dataset.country?.trim();
+    const geoapifyApiKey = "<%= process.env.YOUR_GEOAPIFY_API_KEY || '' %>";
+    const searchText = [location, country].filter(Boolean).join(", ");
+
+    if (!geoapifyApiKey) {
+      mapElement.innerHTML = "<p>Geoapify API key is missing.</p>";
+      return;
+    }
+
+    if (!searchText) {
+      mapElement.innerHTML = "<p>No location was provided.</p>";
+      return;
+    }
+
+    const geocodeUrl =
+      "https://api.geoapify.com/v1/geocode/search?" +
+      new URLSearchParams({
+        text: searchText,
+        format: "geojson",
+        limit: "1",
+        apiKey: geoapifyApiKey,
+      });
+
+    try {
+      const response = await fetch(geocodeUrl);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || `Geoapify request failed: ${response.status}`);
+      }
+
+      if (!data.features || data.features.length === 0) {
+        mapElement.innerHTML = `<p>Location could not be found for: ${searchText}</p>`;
+        return;
+      }
+
+      const coordinates = data.features[0].geometry.coordinates;
+
+      const longitude = coordinates[0];
+      const latitude = coordinates[1];
+
+      const map = L.map("listing-map").setView([latitude, longitude], 13);
+
+      L.tileLayer(
+        `https://maps.geoapify.com/v1/tile/osm-bright-smooth/{z}/{x}/{y}.png?apiKey=${geoapifyApiKey}`,
+        {
+          maxZoom: 20,
+          attribution:
+            "&copy; OpenStreetMap contributors &copy; Geoapify",
+        }
+      ).addTo(map);
+
+      L.marker([latitude, longitude])
+        .addTo(map)
+        .bindPopup(searchText)
+        .openPopup();
+    } catch (error) {
+      console.error("Map loading failed:", error);
+      mapElement.innerHTML = "<p>Unable to load map.</p>";
+    }
+  });
+</script>
+</div>

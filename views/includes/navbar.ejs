@@ -1,0 +1,45 @@
+<nav class="navbar navbar-expand-md border-bottom sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/listings">
+      <i class="fa-regular fa-compass"></i>
+      <span>Explore</span>
+    </a>
+    <form class="search-form" action="/listings" method="GET" role="search">
+      <input
+        type="search"
+        name="country"
+        value="<%= typeof country !== 'undefined' ? country : '' %>"
+        placeholder="Search destinations"
+        aria-label="Search destinations by country"
+      />
+      <button type="submit">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <span>Search</span>
+      </button>
+    </form>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link home-link" href="/listings/new">Airbnb your home</a>
+        </li>
+        <% if(!currUser){ %>
+        <li class="nav-item">
+          <a class="nav-link " aria-current="page" href="/signup">Sign up</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/login">Log in</a>
+        </li>
+        <% } %>
+        <% if(currUser){ %>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">Log out</a>
+        </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
